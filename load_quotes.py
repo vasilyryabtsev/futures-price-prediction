@@ -5,7 +5,7 @@ import pandas as pd
 import psycopg2
 from psycopg2 import sql, Error, extras
 
-LIST_OF_TICKERS_1 = ['AAPL', 'MSFT', 'NVDA', 'AMD', 'GOOG', 'XOM', 'MCD', 'KO', 'PFE', 'PG']
+LIST_OF_TICKERS_1 = ['AAPL', 'META', 'NVDA', 'AMD', 'GOOG', 'XOM', 'MCD', 'KO', 'PFE', 'PG']
 
 LIST_OF_TICKERS_2 = ['MSFT', 'AMZN', 'TSLA', 'GOOGL', 'JPM', 'JNJ', 'V', 'UNH', 'HD', 'DIS', 'NFLX', 'VZ', 'INTC', 'CMCSA', 'PEP', 'T', 'MRK', 'CSCO']
 
