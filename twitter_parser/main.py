@@ -23,7 +23,7 @@ ERORRS = (TooManyRequests, ConnectTimeout)
 # login credentials
 config = ConfigParser()
 config.read('config.ini')
-username = config['X']['username']
+main_username = config['X']['username']
 email = config['X']['email']
 password = config['X']['password']
 
@@ -89,14 +89,13 @@ async def main():
     user_answer = input() 
     if user_answer == 'yes':
         await client.login(
-            auth_info_1=username ,
+            auth_info_1=main_username,
             auth_info_2=email,
             password=password
         )
-    else:
         client.save_cookies('cookies.json')
-    
-    client.load_cookies('cookies.json')
+    else:
+        client.load_cookies('cookies.json')
     
     usernames = read_file(USERNAMES_PATH)
     
