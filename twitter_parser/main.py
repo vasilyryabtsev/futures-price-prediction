@@ -133,6 +133,9 @@ async def main():
             tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
             to_file(DATASET_PATH, tweets, username)
         
+        with open(CACHE_PATH, mode='a') as file:
+                    print(username, file=file)
+        
         for k in tqdm(range(TWEETS_PER_USER // COUNT_FOR_REQUEST - 1)):
             print(f'loaded {(k + 1) * COUNT_FOR_REQUEST} tweets by @{username}')
             time.sleep(randint(5, 15))
@@ -144,10 +147,6 @@ async def main():
                 tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
                 
             to_file(DATASET_PATH, tweets, username)
-            
-            if k == TWEETS_PER_USER // COUNT_FOR_REQUEST - 2:
-                with open(CACHE_PATH, mode='a') as file:
-                    print(username, file=file)
             
 
 asyncio.run(main())
