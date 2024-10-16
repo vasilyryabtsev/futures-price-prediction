@@ -83,6 +83,12 @@ def error_processing(client):
     print(traceback.format_exc())
     logout_login(client)
     
+def is_no_tweets(tweets):
+    if not tweets:
+        print('not found')
+        return True
+    return False
+    
 async def main():
     print('First time logging in? yes/no')
     
@@ -135,6 +141,9 @@ async def main():
         
         with open(CACHE_PATH, mode='a') as file:
                     print(username, file=file)
+                    
+        if is_no_tweets(tweets):
+            continue
         
         for k in tqdm(range(TWEETS_PER_USER // COUNT_FOR_REQUEST - 1)):
             print(f'loaded {(k + 1) * COUNT_FOR_REQUEST} tweets by @{username}')
@@ -145,7 +154,10 @@ async def main():
             except ERORRS:
                 error_processing(client)
                 tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
-                
+            
+            if is_no_tweets(tweets):
+                break
+            
             to_file(DATASET_PATH, tweets, username)
             
 
