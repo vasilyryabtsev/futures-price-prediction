@@ -7,15 +7,18 @@ from random import randint
 import asyncio
 import traceback
 from tqdm import tqdm
+import os
+from httpx import ConnectTimeout
 
 
 DATASET_PATH = 'infl_tweets'
 USERNAMES_PATH = 'infl_usernames'
+CACHE_PATH = 'infl_cache'
 COUNT_FOR_REQUEST = 20
 TWEETS_PER_USER = 100
 PAUSE_TIME_MIN = 15 * 60
 PAUSE_TIME_MAX = 30 * 60
-
+ERORRS = (TooManyRequests, ConnectTimeout)
 
 # login credentials
 config = ConfigParser()
@@ -29,7 +32,7 @@ password = config['X']['password']
 client = Client('en-US')
 
 
-def read_usernames(path):
+def read_file(path):
     with open(path, mode='r') as file:
         lines = file.readlines()
         lines = [line.strip() for line in lines]
@@ -56,7 +59,8 @@ def to_file(path, tweets, username):
                 "view_count": tweet.view_count, # The count of views.
                 "view_count_state": tweet.view_count_state, # The state of the tweet views.
                 "retweet_count": tweet.retweet_count, # The count of retweets for the tweet.
-                "place": tweet.place, # The location associated with the tweet.
+                # "place": tweet.place, # The location associated with the tweet.
+                "place": None, # The location associated with the tweet.
                 "is_translatable": tweet.is_translatable, # Indicates if the tweet is translatable.
                 "edits_remaining": tweet.edits_remaining, # The remaining number of edits allowed for the tweet.
                 "has_card": tweet.has_card, # Indicates if the tweet contains a card.
@@ -80,21 +84,33 @@ def error_processing(client):
     logout_login(client)
     
 async def main():
-    # await client.login(
-    #     auth_info_1=username ,
-    #     auth_info_2=email,
-    #     password=password
-    # )
-    # client.save_cookies('cookies.json')
+    print('First time logging in? yes/no')
+    
+    user_answer = input() 
+    if user_answer == 'yes':
+        await client.login(
+            auth_info_1=username ,
+            auth_info_2=email,
+            password=password
+        )
+    else:
+        client.save_cookies('cookies.json')
     
     client.load_cookies('cookies.json')
     
-    usernames = read_usernames(USERNAMES_PATH)
+    usernames = read_file(USERNAMES_PATH)
+    
+    cache_list = []
+    if os.path.exists(CACHE_PATH):
+        cache_list = read_file(CACHE_PATH)
+    
     
     start_time = time.time()
     pause_time = randint(PAUSE_TIME_MIN, PAUSE_TIME_MAX)
     
     for username in usernames:
+        if username in cache_list:
+            continue
         if time.time() - start_time > pause_time:
             print('need some time for a break')
             
@@ -113,7 +129,7 @@ async def main():
         try:
             tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
             to_file(DATASET_PATH, tweets, username)
-        except TooManyRequests:
+        except ERORRS:
             error_processing(client)
             tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
             to_file(DATASET_PATH, tweets, username)
@@ -124,11 +140,15 @@ async def main():
             
             try:
                 tweets = await tweets.next()
-            except TooManyRequests:
+            except ERORRS:
                 error_processing(client)
                 tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
                 
             to_file(DATASET_PATH, tweets, username)
+            
+            if k == TWEETS_PER_USER // COUNT_FOR_REQUEST - 2:
+                with open(CACHE_PATH, mode='a') as file:
+                    print(username, file=file)
             
 
 asyncio.run(main())
