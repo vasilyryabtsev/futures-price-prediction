@@ -14,8 +14,8 @@ from httpx import ConnectTimeout
 DATASET_PATH = 'infl_tweets'
 USERNAMES_PATH = 'infl_usernames'
 CACHE_PATH = 'infl_cache'
-COUNT_FOR_REQUEST = 20
-TWEETS_PER_USER = 100
+COUNT_FOR_REQUEST = 1
+TWEETS_PER_USER = 20
 PAUSE_TIME_MIN = 15 * 60
 PAUSE_TIME_MAX = 30 * 60
 ERORRS = (TooManyRequests, ConnectTimeout)
@@ -130,6 +130,8 @@ async def main():
         
         print(f'@{username} processing...')
         query = f'(from:{username})'
+        
+        time.sleep(randint(5, 15))
         
         try:
             tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
