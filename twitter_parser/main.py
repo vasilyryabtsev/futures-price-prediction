@@ -11,11 +11,14 @@ import os
 from httpx import ConnectTimeout
 
 
-DATASET_PATH = 'infl_tweets'
-USERNAMES_PATH = 'infl_usernames'
-CACHE_PATH = 'infl_cache'
-COUNT_FOR_REQUEST = 1
-TWEETS_PER_USER = 20
+# DATASET_PATH = '/home/vasily/futures-price-prediction/twitter_parser/comps/comp_tweets_1'
+# USERNAMES_PATH = '/home/vasily/futures-price-prediction/twitter_parser/comps/comp_usernames_1'
+# CACHE_PATH = '/home/vasily/futures-price-prediction/twitter_parser/comps/comp_cache'
+DATASET_PATH = '/home/vasily/futures-price-prediction/twitter_parser/infls/infl_tweets'
+USERNAMES_PATH = '/home/vasily/futures-price-prediction/twitter_parser/infls/infl_usernames'
+CACHE_PATH = '/home/vasily/futures-price-prediction/twitter_parser/infls/infl_cache'
+COUNT_FOR_REQUEST = 20
+TWEETS_PER_USER = 100
 PAUSE_TIME_MIN = 15 * 60
 PAUSE_TIME_MAX = 30 * 60
 ERORRS = (TooManyRequests, ConnectTimeout)
@@ -35,13 +38,14 @@ client = Client('en-US')
 def read_file(path):
     with open(path, mode='r') as file:
         lines = file.readlines()
-        lines = [line.strip() for line in lines]
+        lines = [line.strip('\n') for line in lines]
         return lines
 
-def to_file(path, tweets, username):
+def to_file(path, tweets, username, dict=None):
     with open(path, mode='a') as file:
         for tweet in tweets:
             new_data = {
+                # "ticker": dict[username], # Ticker
                 "username": username, # Username
                 "name": tweet.user.name, # Author of the tweet.
                 "text": tweet.text, # The full text of the tweet.
@@ -102,7 +106,8 @@ async def main():
         client.save_cookies('cookies.json')
     else:
         client.load_cookies('cookies.json')
-    
+
+    # usernames = dict(list(map(str.split, read_file(USERNAMES_PATH))))
     usernames = read_file(USERNAMES_PATH)
     
     cache_list = []
@@ -134,11 +139,11 @@ async def main():
         time.sleep(randint(5, 15))
         
         try:
-            tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
+            tweets = await client.search_tweet(query, 'Latest', count=COUNT_FOR_REQUEST)
             to_file(DATASET_PATH, tweets, username)
         except ERORRS:
             error_processing(client)
-            tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
+            tweets = await client.search_tweet(query, 'Latest', count=COUNT_FOR_REQUEST)
             to_file(DATASET_PATH, tweets, username)
         
         with open(CACHE_PATH, mode='a') as file:
@@ -155,7 +160,7 @@ async def main():
                 tweets = await tweets.next()
             except ERORRS:
                 error_processing(client)
-                tweets = await client.search_tweet(query, 'Top', count=COUNT_FOR_REQUEST)
+                tweets = await client.search_tweet(query, 'Latest', count=COUNT_FOR_REQUEST)
             
             if is_no_tweets(tweets):
                 break
