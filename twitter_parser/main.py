@@ -1,4 +1,4 @@
-from twikit import Client, TooManyRequests
+from twikit import Client
 import time
 from datetime import datetime
 import json
@@ -14,22 +14,15 @@ from httpx import ConnectTimeout
 # DATASET_PATH = '/home/vasily/futures-price-prediction/twitter_parser/comps/comp_tweets_1'
 # USERNAMES_PATH = '/home/vasily/futures-price-prediction/twitter_parser/comps/comp_usernames_1'
 # CACHE_PATH = '/home/vasily/futures-price-prediction/twitter_parser/comps/comp_cache'
-DATASET_PATH = '/home/vasily/futures-price-prediction/twitter_parser/infls/infl_tweets'
-USERNAMES_PATH = '/home/vasily/futures-price-prediction/twitter_parser/infls/infl_usernames'
-CACHE_PATH = '/home/vasily/futures-price-prediction/twitter_parser/infls/infl_cache'
+CURRENT_FOLDER = '/home/vasily/futures-price-prediction/twitter_parser/infls/'
+DATASET_PATH = CURRENT_FOLDER + 'infl_tweets'
+USERNAMES_PATH = CURRENT_FOLDER + 'infl_usernames'
+CACHE_PATH = CURRENT_FOLDER + 'infl_cache'
 COUNT_FOR_REQUEST = 20
 TWEETS_PER_USER = 100
 PAUSE_TIME_MIN = 15 * 60
 PAUSE_TIME_MAX = 30 * 60
-ERORRS = (TooManyRequests, ConnectTimeout)
-
-# login credentials
-config = ConfigParser()
-config.read('config.ini')
-main_username = config['X']['username']
-email = config['X']['email']
-password = config['X']['password']
-
+ERORRS = (ConnectTimeout)
 
 # Initialize client
 client = Client('en-US')
@@ -98,6 +91,13 @@ async def main():
     
     user_answer = input() 
     if user_answer == 'yes':
+        # login credentials
+        config = ConfigParser()
+        config.read('config.ini')
+        main_username = config['X']['username']
+        email = config['X']['email']
+        password = config['X']['password']
+        
         await client.login(
             auth_info_1=main_username,
             auth_info_2=email,
@@ -143,8 +143,11 @@ async def main():
             to_file(DATASET_PATH, tweets, username)
         except ERORRS:
             error_processing(client)
+            start_time = time.time()
+            pause_time = randint(PAUSE_TIME_MIN, PAUSE_TIME_MAX)
             tweets = await client.search_tweet(query, 'Latest', count=COUNT_FOR_REQUEST)
             to_file(DATASET_PATH, tweets, username)
+            
         
         with open(CACHE_PATH, mode='a') as file:
                     print(username, file=file)
@@ -160,6 +163,8 @@ async def main():
                 tweets = await tweets.next()
             except ERORRS:
                 error_processing(client)
+                start_time = time.time()
+                pause_time = randint(PAUSE_TIME_MIN, PAUSE_TIME_MAX)
                 tweets = await client.search_tweet(query, 'Latest', count=COUNT_FOR_REQUEST)
             
             if is_no_tweets(tweets):
@@ -167,5 +172,5 @@ async def main():
             
             to_file(DATASET_PATH, tweets, username)
             
-
+                                                                                                                                                                                                                                                                                                                                                   
 asyncio.run(main())
