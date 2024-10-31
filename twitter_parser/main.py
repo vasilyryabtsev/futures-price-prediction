@@ -9,15 +9,15 @@ import traceback
 from tqdm import tqdm
 import os
 from httpx import ConnectTimeout
+from sys import path
 
+# DATASET_PATH = 'comps/comp_tweets_1'
+# USERNAMES_PATH = 'comps/comp_usernames_1'
+# CACHE_PATH = 'comps/comp_cache'
 
-# DATASET_PATH = '/home/vasily/futures-price-prediction/twitter_parser/comps/comp_tweets_1'
-# USERNAMES_PATH = '/home/vasily/futures-price-prediction/twitter_parser/comps/comp_usernames_1'
-# CACHE_PATH = '/home/vasily/futures-price-prediction/twitter_parser/comps/comp_cache'
-CURRENT_FOLDER = '/home/vasily/futures-price-prediction/twitter_parser/infls/'
-DATASET_PATH = CURRENT_FOLDER + 'infl_tweets'
-USERNAMES_PATH = CURRENT_FOLDER + 'infl_usernames'
-CACHE_PATH = CURRENT_FOLDER + 'infl_cache'
+DATASET_PATH = 'infls/infl_tweets'
+USERNAMES_PATH = 'infls/infl_usernames'
+CACHE_PATH = 'infls/infl_cache'
 COUNT_FOR_REQUEST = 20
 TWEETS_PER_USER = 100
 PAUSE_TIME_MIN = 15 * 60
