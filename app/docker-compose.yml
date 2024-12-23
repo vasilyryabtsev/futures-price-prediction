@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  service_10k:
+    build:
+      context: ./service_10k
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    networks:
+      - app-network
+
+  service_news:
+    build:
+      context: ./service_news
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    networks:
+      - app-network
+
+  service_reddit:
+    build:
+      context: ./service_reddit
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    networks:
+      - app-network
+
+  service_twitter:
+    build:
+      context: ./service_twitter
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    networks:
+      - app-network
+
+  streamlit:
+    build:
+      context: ./streamlit
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    networks:
+      - app-network
+    depends_on:
+      - service_10k
+      - service_news
+      - service_reddit
+      - service_twitter
+
+networks:
+  app-network:
+    driver: bridge
