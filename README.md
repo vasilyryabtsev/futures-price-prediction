@@ -24,3 +24,13 @@
     ```
     docker compose up --build
     ```
+
+Откройте в браузере http://localhost:8501/
+
+### Порты:
+
+8501 - streamlit
+8001 - service_10k
+8002 - service_news
+8003 - service_reddit
+8004 - service_twitter
