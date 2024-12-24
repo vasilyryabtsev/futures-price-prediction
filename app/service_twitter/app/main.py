@@ -11,4 +11,5 @@ with open('model', 'rb') as input_file:
 @app.get("/twitter")
 async def server1_endpoint():
     ans = model.predict(pd.DataFrame(data={'text': ['BUY $APPL']}))
-    return {"message": ans}
+    print(ans)
+    return {"message": 'Hello from service_twitter!'} 
