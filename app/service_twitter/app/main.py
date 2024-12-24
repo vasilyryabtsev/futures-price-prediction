@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import pickle
 import pandas as pd
+from FinBert import preprocessing
 
 app = FastAPI()
 
