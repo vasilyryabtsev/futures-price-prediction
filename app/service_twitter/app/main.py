@@ -1,15 +1,6 @@
 from fastapi import FastAPI
 import pickle
 import pandas as pd
-from FinBert import finbert, preprocessing
-import transformers
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.preprocessing import FunctionTransformer
-import transformers
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import torch
-import numpy as np
-import pandas as pd
 
 app = FastAPI()
 
