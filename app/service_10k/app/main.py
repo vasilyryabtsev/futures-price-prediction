@@ -14,8 +14,10 @@ from datetime import datetime
 # logging.basicConfig(level=config.LOGGING_LEVEL)
 moscow_tz = pytz.timezone('Europe/Moscow')
 
-# Функция для настройки времени в московской временной зоне
 def moscow_time(*args, **kwargs):
+    '''
+    Возвращает время по Москве.
+    '''
     utc_now = datetime.now(pytz.utc)
     moscow_time = utc_now.astimezone(moscow_tz)
     return moscow_time.strftime('%m.%d.%Y %H:%M:%S')
