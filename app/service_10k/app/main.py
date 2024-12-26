@@ -8,12 +8,23 @@ from fastapi.responses import JSONResponse
 import service
 # import app.service_10k.app.entities as entities
 import entities
+import pytz
+from datetime import datetime
 
 # logging.basicConfig(level=config.LOGGING_LEVEL)
+moscow_tz = pytz.timezone('Europe/Moscow')
 
+# Функция для настройки времени в московской временной зоне
+def moscow_time(*args, **kwargs):
+    utc_now = datetime.now(pytz.utc)
+    moscow_time = utc_now.astimezone(moscow_tz)
+    return moscow_time.strftime('%m.%d.%Y %H:%M:%S')
+
+# Устанавливаем нашу функцию для формата времени
 file_log = logging.FileHandler('logs/Log.log')
 console_out = logging.StreamHandler()
 formatter = logging.Formatter('[service_10k | %(asctime)s | %(levelname)s]: %(message)s', datefmt='%m.%d.%Y %H:%M:%S')
+formatter.formatTime = moscow_time
 file_log.setFormatter(formatter)
 console_out.setFormatter(formatter)
 
