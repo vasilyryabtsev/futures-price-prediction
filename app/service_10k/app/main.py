@@ -9,17 +9,30 @@ import service
 # import app.service_10k.app.entities as entities
 import entities
 
-logging.basicConfig(level=config.LOGGING_LEVEL)
+# logging.basicConfig(level=config.LOGGING_LEVEL)
+
+file_log = logging.FileHandler('logs/Log.log')
+console_out = logging.StreamHandler()
+formatter = logging.Formatter('[service_10k | %(asctime)s | %(levelname)s]: %(message)s', datefmt='%m.%d.%Y %H:%M:%S')
+file_log.setFormatter(formatter)
+console_out.setFormatter(formatter)
+
+logger = logging.getLogger()
+logger.setLevel(config.LOGGING_LEVEL)
+logger.addHandler(file_log)
+logger.addHandler(console_out)
+
+# logger.info('Info message??))')
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logging.info("Старт создания контекста")
+    logger.info("Старт создания контекста")
     try:
         service.model_context.load_models() 
-        logging.info("Модели загружены")
+        logger.info("Модели загружены")
         yield 
     except Exception as e:
-        logging.error(f"Ошибка при загрузке контекста: {e}")
+        logger.error(f"Ошибка при загрузке контекста: {e}")
     finally:
         service.model_context.model_lr = None
         service.model_context.tokenizer = None
@@ -34,10 +47,10 @@ async def server1_endpoint():
 @app.post("/report_prediction")
 async def predict_test(file: UploadFile = File(...)) -> entities.PredictResponse:
     try:
-        logging.info(f"Файл получен: {file.filename}")
+        logger.info(f"Файл получен: {file.filename}")
         contents = await file.read()
         report = contents.decode("utf-8")
-        logging.info(f"Файл прочитан: {file.filename}")
+        logger.info(f"Файл прочитан: {file.filename}")
         return service.predict_text(report)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
