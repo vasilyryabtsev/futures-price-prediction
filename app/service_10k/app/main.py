@@ -1,10 +1,13 @@
 from fastapi import FastAPI, File, UploadFile
 import logging
 from contextlib import asynccontextmanager
-import app.service_10k.app.config as config
+# import app.service_10k.app.config as config
+import config as config
 from fastapi.responses import JSONResponse
-import app.service_10k.app.service as service
-import app.service_10k.app.entities as entities
+# import app.service_10k.app.service as service
+import service
+# import app.service_10k.app.entities as entities
+import entities
 
 logging.basicConfig(level=config.LOGGING_LEVEL)
 
@@ -23,6 +26,10 @@ async def lifespan(app: FastAPI):
         service.model_context.model_bert = None
 
 app = FastAPI(lifespan=lifespan)
+
+@app.get("/10_k")
+async def server1_endpoint():
+    return {"message": "Hello from 10_k!"}
 
 @app.post("/report_prediction")
 async def predict_test(file: UploadFile = File(...)) -> entities.PredictResponse:

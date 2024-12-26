@@ -1,5 +1,7 @@
-import app.service_10k.app.entities as entities
-import app.service_10k.app.config as config
+# import app.service_10k.app.entities as entities
+import entities
+# import app.service_10k.app.config as config
+import config
 import torch
 import joblib
 from transformers import DistilBertTokenizer, DistilBertModel
