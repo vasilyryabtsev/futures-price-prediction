@@ -50,4 +50,4 @@ async def predict_test(file: UploadFile = File(...)) -> entities.PredictResponse
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, log_config=settings.LOGGING_CONFIG, port=8001)
+    uvicorn.run(app, log_config=settings.LOGGING_CONFIG, host='0.0.0.0', port=8001)
