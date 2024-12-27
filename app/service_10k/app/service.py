@@ -3,10 +3,8 @@ import torch
 import joblib
 from transformers import DistilBertTokenizer, DistilBertModel
 
-from app.service_10k.app import entities
-from app.service_10k.app import config
-
-logging.basicConfig(level=config.LOGGING_LEVEL)
+import entities
+import config
 
 
 class ModelContext:
@@ -29,26 +27,27 @@ class ModelContext:
 
 
 model_context = ModelContext()
+logger = logging.getLogger('uvicorn.error')
 
 
 def predict_text(report: str) -> entities.PredictResponse:
     """
     This method involves tokenization and vectorization of text, as well as forecasting
     """
-    logging.info('Токенизация начата')
+    logger.info('Токенизация начата')
     tokens = model_context.tokenizer(report[42080:47080],
                                      return_tensors='pt',
                                      padding=True, truncation=True).to(model_context.device)
-    logging.info('Токенизация завершена')
-    logging.info('Старт расчета эмбеддингов')
+    logger.info('Токенизация завершена')
+    logger.info('Старт расчета эмбеддингов')
     with torch.no_grad():
         outputs = model_context.model_bert(**tokens)
         embedding = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
-    logging.info('Расчет эмбеддингов завершен')
+    logger.info('Расчет эмбеддингов завершен')
 
-    logging.info('Старт прогнозирования вероятности')
+    logger.info('Старт прогнозирования вероятности')
     probabilities = model_context.model_lr.predict_proba(embedding)
-    logging.info('Прогнозирование вероятности завершено')
+    logger.info('Прогнозирование вероятности завершено')
 
     response = entities.PredictResponse(
         negative_probability=probabilities[0][0],

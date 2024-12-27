@@ -1,40 +1,16 @@
 import logging
 from contextlib import asynccontextmanager
-from datetime import datetime
 
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-import pytz
+import uvicorn
 
-from app.service_10k.app import entities
-from app.service_10k.app import config
-from app.service_10k.app import service
-
-logging.basicConfig(level=config.LOGGING_LEVEL)
-moscow_tz = pytz.timezone('Europe/Moscow')
+import entities
+import service
+import settings
 
 
-def moscow_time(*args, **kwargs):
-    '''
-    Возвращает время по Москве.
-    '''
-    utc_now = datetime.now(pytz.utc)
-    moscow_time = utc_now.astimezone(moscow_tz)
-    return moscow_time.strftime('%m.%d.%Y %H:%M:%S')
-
-
-# Устанавливаем нашу функцию для формата времени
-file_log = logging.FileHandler('logs/Log.log')
-console_out = logging.StreamHandler()
-formatter = logging.Formatter('[service_10k | %(asctime)s | %(levelname)s]: %(message)s', datefmt='%m.%d.%Y %H:%M:%S')
-formatter.formatTime = moscow_time
-file_log.setFormatter(formatter)
-console_out.setFormatter(formatter)
-
-logger = logging.getLogger()
-logger.setLevel(config.LOGGING_LEVEL)
-logger.addHandler(file_log)
-logger.addHandler(console_out)
+logger = logging.getLogger('uvicorn.error')
 
 
 @asynccontextmanager
@@ -54,6 +30,7 @@ async def lifespan(app: FastAPI):
         service.model_context.tokenizer = None
         service.model_context.model_bert = None
 
+
 app = FastAPI(lifespan=lifespan)
 
 
@@ -71,4 +48,6 @@ async def predict_test(file: UploadFile = File(...)) -> entities.PredictResponse
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-# uvicorn app.service_10k.app.main:app --reload
+
+if __name__ == '__main__':
+    uvicorn.run(app, log_config=settings.LOGGING_CONFIG, port=8001)
