@@ -1,18 +1,18 @@
-from fastapi import FastAPI, File, UploadFile
 import logging
 from contextlib import asynccontextmanager
-# import app.service_10k.app.config as config
-import config as config
-from fastapi.responses import JSONResponse
-# import app.service_10k.app.service as service
-import service
-# import app.service_10k.app.entities as entities
-import entities
-import pytz
 from datetime import datetime
 
-# logging.basicConfig(level=config.LOGGING_LEVEL)
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
+import pytz
+
+from app.service_10k.app import entities
+from app.service_10k.app import config
+from app.service_10k.app import service
+
+logging.basicConfig(level=config.LOGGING_LEVEL)
 moscow_tz = pytz.timezone('Europe/Moscow')
+
 
 def moscow_time(*args, **kwargs):
     '''
@@ -21,6 +21,7 @@ def moscow_time(*args, **kwargs):
     utc_now = datetime.now(pytz.utc)
     moscow_time = utc_now.astimezone(moscow_tz)
     return moscow_time.strftime('%m.%d.%Y %H:%M:%S')
+
 
 # Устанавливаем нашу функцию для формата времени
 file_log = logging.FileHandler('logs/Log.log')
@@ -35,17 +36,19 @@ logger.setLevel(config.LOGGING_LEVEL)
 logger.addHandler(file_log)
 logger.addHandler(console_out)
 
-# logger.info('Info message??))')
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Loading models ans creating context
+    """
     logger.info("Старт создания контекста")
     try:
-        service.model_context.load_models() 
+        service.model_context.load_models()
         logger.info("Модели загружены")
-        yield 
+        yield
     except Exception as e:
-        logger.error(f"Ошибка при загрузке контекста: {e}")
+        logger.error("Ошибка при загрузке контекста: %s", e)
     finally:
         service.model_context.model_lr = None
         service.model_context.tokenizer = None
@@ -54,17 +57,16 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/10_k")
-async def server1_endpoint():
-    return {"message": "Hello from 10_k!"}
-
 @app.post("/report_prediction")
 async def predict_test(file: UploadFile = File(...)) -> entities.PredictResponse:
+    """
+    Predicting probabilities
+    """
     try:
-        logger.info(f"Файл получен: {file.filename}")
+        logger.info("Файл получен: %s", file.filename)
         contents = await file.read()
         report = contents.decode("utf-8")
-        logger.info(f"Файл прочитан: {file.filename}")
+        logger.info("Файл получен: %s", file.filename)
         return service.predict_text(report)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
