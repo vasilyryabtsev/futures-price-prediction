@@ -53,6 +53,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
 @app.get("/10_k")
 async def server1_endpoint():
     return {"message": "Hello from 10_k!"}
@@ -67,6 +68,5 @@ async def predict_test(file: UploadFile = File(...)) -> entities.PredictResponse
         return service.predict_text(report)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
-    
 
 # uvicorn app.service_10k.app.main:app --reload
