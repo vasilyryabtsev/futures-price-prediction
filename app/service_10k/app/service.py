@@ -55,3 +55,10 @@ def predict_text(report: str) -> entities.PredictResponse:
     )
 
     return response
+
+
+def get_params() -> entities.ParamsEntity:
+        """
+        Return an instance of ParamsEntity with default parameters.
+        """
+        return entities.ParamsEntity()
