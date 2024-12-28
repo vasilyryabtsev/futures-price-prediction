@@ -48,6 +48,7 @@ async def predict_test(file: UploadFile = File(...)) -> entities.PredictResponse
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
     
+
 @app.get("/get_params")
 async def get_params() -> entities.ParamsEntity:
     return service.get_params()
