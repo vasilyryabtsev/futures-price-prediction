@@ -19,12 +19,11 @@ class TextInput(BaseModel):
 
 # Описание структуры выходных данных
 class PredictionResponse(BaseModel):
-    text: str
-    prediction: int
-    probabilities: list[float]
+    negative_probability: float
+    positive_probability: float
 
-@app.post("/twitter", response_model=PredictionResponse)
-async def predict_sentiment(request: Request, response: Response, input_data: TextInput):
+@app.post("/report_prediction", response_model=PredictionResponse)
+async def predict_sentiment(request: Request, input_data: TextInput):
     """
     Принимает текст на вход и возвращает предсказания модели.
     """
@@ -42,11 +41,9 @@ async def predict_sentiment(request: Request, response: Response, input_data: Te
         print(f"Предсказания модели: {prediction}, вероятности: {probabilities}")
 
         # Формируем ответ
-        response.headers["X-Custom-Header"] = "Custom Response Header Example"
         return PredictionResponse(
-            text=input_data.text,
-            prediction=int(prediction),
-            probabilities=probabilities,
+            negative_probability=probabilities[0],
+            positive_probability=probabilities[1]
         )
     except Exception as e:
         print(f"Ошибка в обработке запроса: {str(e)}")
