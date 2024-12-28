@@ -61,4 +61,5 @@ def get_params() -> entities.ParamsEntity:
         """
         Return an instance of ParamsEntity with default parameters.
         """
+        logger.info('Запрошена информация о гиперпараметрах обучения')
         return entities.ParamsEntity()
