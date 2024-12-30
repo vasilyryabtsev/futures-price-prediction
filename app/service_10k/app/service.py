@@ -1,7 +1,6 @@
 import logging
 import torch
 import joblib
-import os
 from transformers import DistilBertTokenizer, DistilBertModel
 
 import entities
@@ -62,7 +61,7 @@ def predict_text(report: str) -> entities.PredictResponse:
     return response
 
 
-def get_params() -> entities.ParamsEntity:
+def get_parameters() -> entities.ParamsEntity:
     """
     Return an instance of ParamsEntity with default parameters.
     """

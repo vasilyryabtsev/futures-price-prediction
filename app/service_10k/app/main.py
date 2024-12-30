@@ -2,34 +2,25 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
 import uvicorn
 
 from entities import PredictResponse, ParamsEntity
-
-import service
-import config
+from service import model_context, predict_text, get_parameters
+from config import LOGGING_CONFIG
 
 
 logger = logging.getLogger('uvicorn.error')
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     """
     Loading models ans creating context
     """
     logger.info("Старт создания контекста")
-    try:
-        service.model_context.load_models()
-        logger.info("Модели загружены")
-        yield
-    except Exception as e:
-        logger.error("Ошибка при загрузке контекста: %s", e)
-    finally:
-        service.model_context.model_lr = None
-        service.model_context.tokenizer = None
-        service.model_context.model_bert = None
+    model_context.load_models()
+    logger.info("Модели загружены")
+    yield
 
 
 app = FastAPI(lifespan=lifespan)
@@ -40,23 +31,23 @@ async def predict_test(file: UploadFile = File(...)) -> PredictResponse:
     """
     Predicting probabilities
     """
-    try:
-        logger.info("Файл получен: %s", file.filename)
-        contents = await file.read()
-        report = contents.decode("utf-8")
-        logger.info("Файл получен: %s", file.filename)
-        return service.predict_text(report)
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+    logger.info("Файл получен: %s", file.filename)
+    contents = await file.read()
+    report = contents.decode("utf-8")
+    logger.info("Файл получен: %s", file.filename)
+    return predict_text(report)
 
 
 @app.get("/get_params")
 async def get_params() -> ParamsEntity:
-    return service.get_params()
+    '''
+    Model parameters.
+    '''
+    return get_parameters()
 
 
 if __name__ == '__main__':
     uvicorn.run(app,
-                log_config=config.LOGGING_CONFIG,
+                log_config=LOGGING_CONFIG,
                 host='0.0.0.0',
                 port=8001)
