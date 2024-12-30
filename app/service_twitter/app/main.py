@@ -22,6 +22,9 @@ class PredictionResponse(BaseModel):
     negative_probability: float
     positive_probability: float
 
+class HyperparametersResponse(BaseModel):
+    hyperparameters: dict 
+
 @app.post("/report_prediction", response_model=PredictionResponse)
 async def predict_sentiment(request: Request, input_data: TextInput):
     """
@@ -36,7 +39,6 @@ async def predict_sentiment(request: Request, input_data: TextInput):
         print(f"Создан DataFrame: {df}")
 
         # Получение предсказаний и вероятностей
-        prediction = model.predict(df)[0]
         probabilities = model.predict_proba(df)[0].tolist()
         print(f"Предсказания модели: {prediction}, вероятности: {probabilities}")
 
@@ -48,3 +50,20 @@ async def predict_sentiment(request: Request, input_data: TextInput):
     except Exception as e:
         print(f"Ошибка в обработке запроса: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Ошибка обработки: {str(e)}")
+
+@app.get("/hyperparameters", response_model=HyperparametersResponse)
+async def get_hyperparameters():
+    """
+    Возвращает гиперпараметры модели.
+    """
+    try:
+        # Проверяем, поддерживает ли модель метод `get_params`
+        if hasattr(model, "get_params"):
+            hyperparameters = model.get_params()
+            print(f"Гиперпараметры модели: {hyperparameters}")
+            return HyperparametersResponse(hyperparameters=hyperparameters)
+        else:
+            raise HTTPException(status_code=400, detail="Модель не поддерживает метод get_params")
+    except Exception as e:
+        print(f"Ошибка при получении гиперпараметров: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка при получении гиперпараметров: {str(e)}")
