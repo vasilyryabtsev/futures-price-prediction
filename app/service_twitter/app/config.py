@@ -1,9 +1,13 @@
-from uvicorn.logging import DefaultFormatter
 import os
+from uvicorn.logging import DefaultFormatter
 
 os.makedirs('logs', exist_ok=True)
 
-service_name = 'service_twitter'
+time = '%(asctime)s'
+service_name = '[service_twitter]'
+process_name = '[%(processName)s: %(process)d]'
+over_names = '[%(levelname)s] %(name)s:'
+message = '%(message)s'
 
 LOGGING_CONFIG = {
     'version': 1,
@@ -15,7 +19,11 @@ LOGGING_CONFIG = {
             'use_colors': True
         },
         'custom_formatter': {
-            'format': f"%(asctime)s [{service_name}] [%(processName)s: %(process)d] [%(levelname)s] %(name)s: %(message)s",
+            'format': ' '.join([time,
+                                service_name,
+                                process_name,
+                                over_names,
+                                message])
         }
     },
     'handlers': {
