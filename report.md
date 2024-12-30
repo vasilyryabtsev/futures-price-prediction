@@ -50,11 +50,11 @@
 │       │   ├── __init__.py # Инициализация модуля
 │       │   ├── app.py # Главный файл приложения Streamlit
 │       │   ├── eda_10k # Визуализация EDA для отчетов 10-K
-│       │   │   └── ROC_AUC.png # ROC-кривая для анализа
+│       │   │   └── ROC_AUC.png
 │       │   ├── eda_twitter # Визуализация EDA для данных Twitter
-│       │   │   ├── roc_curve.png # ROC-кривая
-│       │   │   ├── tweets_year.png # График количества твитов по годам
-│       │   │   └── words_cloud.png # Облако слов
+│       │   │   ├── roc_curve.png
+│       │   │   ├── tweets_year.png
+│       │   │   └── words_cloud.png
 │       │   ├── page_10k # Страница для анализа отчетов 10-K
 │       │   │   ├── 10k.py # Логика страницы
 │       │   │   └── __init__.py # Инициализация модуля
