@@ -1,5 +1,5 @@
-from uvicorn.logging import DefaultFormatter
 import os
+from uvicorn.logging import DefaultFormatter
 
 PATH_LR_MODEL = 'model/lrm.joblib'
 DEVICE = 'cpu'
