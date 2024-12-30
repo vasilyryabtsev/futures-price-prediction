@@ -36,6 +36,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8004:8004"
+    volumes:
+      - ./logs:/code/app/logs
     networks:
       - app-network
 

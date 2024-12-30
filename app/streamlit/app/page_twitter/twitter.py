@@ -1,65 +1,111 @@
 import streamlit as st
 import requests
 import pandas as pd
-from collections import Counter
-import re
 
-def analyze_text_file(user_input):
-    """
-    Выполняет базовый анализ текстового файла.
-    """
-    st.title("Анализ популярных слов")
+@st.cache_data
+def upload_data(path: str) -> pd.DataFrame:
+    '''
+    Загрузка датасета.
+    '''
+    return pd.read_csv(path)
+
+@st.cache_data
+def get_unique(col: pd.Series) -> pd.DataFrame:
+    '''
+    Возвращает уникальные значения атрибута.
+    '''
+    return pd.DataFrame({col.name: col.unique()})
+
+def show_images():
+    '''
+    Показывает графики.
+    '''
+
+    images = [
+        'eda_twitter/tweets_year.png',
+        'eda_twitter/words_cloud.png'
+    ]
+
+    check_plot = st.checkbox('Показать графики')
+    if check_plot:
+        st.image(images[0])
+        st.image(images[1])
+        
+@st.cache_data
+def class_prop(target: pd.Series) -> pd.DataFrame:
+    '''
+    Возвращает соотношение классов.
+    '''
+    return target.value_counts(normalize=True).to_frame()
+
+def eda():
+    '''
+    Результаты разведовательного анализа данных.
+    '''
+    st.header("EDA")
+    
+    data = upload_data('page_twitter/final.csv')
+    data = data[['username', 'ticker', 'text', 'year', 'month', 'day', '1_day_after']]
+    
+    st.write(data)
+    st.write(f'''
+    Для обучения модели было отобрано {data.shape[0]} твита инфлюенсеров из финансовой сферы по выбранным тикерам.
+    Таргетом является столбец 1_day_after, т.е. вырастет цена акции на следующий день после публикации твита или нет.
+             ''')
+    st.write("Список инфлюенсеров:")
+    st.write(get_unique(data['username']))
+    st.write("Список тикеров:")
+    st.write(get_unique(data['ticker']))
+    
+    show_images()
+    
+    st.write('Соотношение классов:')
+    st.write(class_prop(data['1_day_after']))
+    
+def model_params():
+    '''
+    Гиперпараметры модели.
+    '''
+    pass
+
+@st.cache_data
+def get_predict(text):
+    '''
+    Возвращает прогноз модели.
+    '''
+    api_url = "http://service_twitter:8004/report_prediction"
+    input_data = {"text": text}
+    try:
+        response = requests.post(api_url, json=input_data)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"Не удалось подключиться к сервису: {e}")
+        return dict()
+    
+def model_prediction():
+    '''
+    Прогноз модели.
+    '''
+    user_input = st.text_input('Введите текст:', placeholder='The chance of $MSFT winning an appeal is slim.')
     if user_input:
-        words = re.findall(r'\b\w+\b', user_input.lower())
-        word_counts = Counter(words)
-        word_freq_df = pd.DataFrame(word_counts.items(), columns=["Слово", "Частота"]).sort_values(by="Частота", ascending=False)
-        st.subheader("Топ-10 популярных слов:")
-        st.dataframe(word_freq_df.head(10))
-        st.subheader("Гистограмма частот:")
-        st.bar_chart(word_freq_df.set_index("Слово").head(10))
-def print_eda():
-    st.header("Информация о модели")
-    st.image("/code/app/eda_twitter/cnt_twitts.png", caption="Кол-во твитов по годам")
-    st.image("/code/app/eda_twitter/tags.png", caption="Самые популярные хэштеги")
-    st.image("/code/app/eda_twitter/title.png", caption="Самые популярные слова в названиях")
-    st.image("/code/app/eda_twitter/words_title.png", caption="Самые популярные слова в названиях")
-
-def giper_param():
-    if "show_image" not in st.session_state:
-        st.session_state.show_image = False
-
-    if st.button("Открыть гиперпараметры"):
-        st.session_state.show_image = not st.session_state.show_image
-
-    # Отображение или скрытие изображения
-    if st.session_state.show_image:
-        st.header("Гиперпараметры")
-        st.write("Параметр регуляризации: C=1.77")
-        st.image("/code/app/eda_twitter/metrics.png", caption="Метрики качества модели")
-
-def upload_dataset():
-    user_input = st.text_input("Введите текст:", placeholder="Например, введите свой пост")
-    if user_input:
-        analyze_text_file(user_input)
-
-        print_eda()
-        giper_param()
-
-        api_url = "http://service_twitter:8004/report_prediction"
-        try:
-            input_data = {"text": user_input}
-            response = requests.post(api_url, json=input_data)
-            response.raise_for_status()
-            st.header("Результат прогноза")
-            st.json(response.json())
-            return response
-        except requests.exceptions.RequestException as e:
-            st.error(f"Не удалось подключиться к сервису: {e}")
-    return None
-
+        pred = get_predict(user_input)
+        if len(pred) > 0:
+            st.write(f"🟥: {pred['negative_probability']}")
+            st.write(f"🟩: {pred['positive_probability']}")
+        else:
+            st.write(f"🟥: 0.0")
+            st.write(f"🟩: 0.0")
 
 def render_page():
-    st.title("Streamlit-приложение для анализа и моделей")
-
-    # Загрузка данных
-    data = upload_dataset()
+    check_eda = st.checkbox('EDA')
+    if check_eda:
+        eda()
+        
+    check_params = st.checkbox('Параметры модели')
+    if check_params:
+        model_params()
+        
+    check_prediction = st.checkbox('Прогноз модели')
+    if check_prediction:
+        model_prediction()
