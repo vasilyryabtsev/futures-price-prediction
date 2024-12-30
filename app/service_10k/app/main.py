@@ -7,7 +7,7 @@ import uvicorn
 
 import entities
 import service
-import settings
+import config
 
 
 logger = logging.getLogger('uvicorn.error')
@@ -55,4 +55,4 @@ async def get_params() -> entities.ParamsEntity:
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, log_config=settings.LOGGING_CONFIG, host='0.0.0.0', port=8001)
+    uvicorn.run(app, log_config=config.LOGGING_CONFIG, host='0.0.0.0', port=8001)
