@@ -6,6 +6,7 @@ import pandas as pd
 import uvicorn
 import config
 import logging
+import json
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -36,6 +37,9 @@ class PredictionResponse(BaseModel):
     negative_probability: float
     positive_probability: float
 
+class HyperparametersResponse(BaseModel):
+    hyperparameters: dict 
+
 @app.post("/report_prediction", response_model=PredictionResponse)
 async def predict_sentiment(request: Request, input_data: TextInput):
     """
@@ -61,6 +65,34 @@ async def predict_sentiment(request: Request, input_data: TextInput):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка обработки: {str(e)}")
+
+# Удаление несериализуемых частей
+def filter_serializable(obj):
+    '''
+    Подготовка объекта к сериализации.
+    '''
+    if callable(obj):
+        return str(obj)
+    try:
+        json.dumps(obj)
+        return obj
+    except (TypeError, OverflowError):
+        return str(obj)
+
+@app.get("/hyperparameters", response_model=HyperparametersResponse)
+async def get_hyperparameters():
+    """
+    Возвращает гиперпараметры модели.
+    """
+    try:
+        hyperparameters = app.state.model.get_params()
+        serialized = {key: filter_serializable(value) for key, value in hyperparameters.items()}
+        logger.info(f"Гиперпараметры модели: {hyperparameters}")
+        return HyperparametersResponse(hyperparameters=serialized)
+    except Exception as e:
+        logger.info(f"Ошибка при получении гиперпараметров: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка при получении гиперпараметров: {str(e)}")
+
     
 if __name__ == '__main__':
     uvicorn.run(app, log_config=config.LOGGING_CONFIG, host='0.0.0.0', port=8004)
