@@ -2,11 +2,13 @@ import streamlit as st
 import requests
 import pandas as pd
 
+
 def eda():
     '''
     Результаты разведовательного анализа данных.
     '''
     pass
+
 
 @st.cache_data
 def get_params():
@@ -20,7 +22,9 @@ def get_params():
         return response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"Не удалось подключиться к сервису: {e}")
-        
+        return {}
+
+
 def model_params():
     '''
     Параметры и гиперпараметры модели.
@@ -28,9 +32,11 @@ def model_params():
     st.image('eda_10k/ROC_AUC.png', caption='График ROC кривой')
     params = get_params()
     if params:
-        param_df = pd.DataFrame(list(params.items()), columns=["Параметр", "Значение"])
-        
+        param_df = pd.DataFrame(list(params.items()),
+                                columns=["Параметр", "Значение"])
+
         st.table(param_df)
+
 
 def file_prev(uploaded_file):
     '''
@@ -39,7 +45,8 @@ def file_prev(uploaded_file):
     content = uploaded_file.read().decode("utf-8")
 
     st.text_area(uploaded_file.name, content, height=300)
-    
+
+
 @st.cache_data
 def get_predict(uploaded_file):
     '''
@@ -53,8 +60,9 @@ def get_predict(uploaded_file):
         return response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"Не удалось подключиться к сервису: {e}")
-        return dict()
-    
+        return {}
+
+
 def model_prediction():
     '''
     Прогноз модели.
@@ -67,22 +75,22 @@ def model_prediction():
             st.write(f"🟥: {pred['negative_probability']}")
             st.write(f"🟩: {pred['positive_probability']}")
         else:
-            st.write(f"🟥: 0.0")
-            st.write(f"🟩: 0.0")
+            st.write("🟥: 0.0")
+            st.write("🟩: 0.0")
+
 
 def render_page():
+    '''
+    Рендерит страницу.
+    '''
     check_eda = st.checkbox('EDA')
     if check_eda:
         eda()
-        
+
     check_params = st.checkbox('Параметры модели')
     if check_params:
         model_params()
-        
+
     check_prediction = st.checkbox('Прогноз модели')
     if check_prediction:
         model_prediction()
-
-
-
-
