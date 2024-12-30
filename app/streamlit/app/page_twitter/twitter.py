@@ -77,11 +77,32 @@ def eda():
     st.write(class_prop(data['1_day_after']))
 
 
+@st.cache_data
+def get_params():
+    '''
+    Получает параметры модели.
+    '''
+    api_url = 'http://service_twitter:8004/hyperparameters'
+    try:
+        response = requests.get(api_url)
+        response.raise_for_status()
+        return response.json()['hyperparameters']
+    except requests.exceptions.RequestException as e:
+        st.error(f"Не удалось подключиться к сервису: {e}")
+        return {}
+
+
 def model_params():
     '''
-    Гиперпараметры модели.
+    Параметры и гиперпараметры модели.
     '''
-    pass
+    st.image('eda_twitter/roc_curve.png', caption='График ROC кривой')
+    params = get_params()
+    if params:
+        param_df = pd.DataFrame(list(params.items()),
+                                columns=["Параметр", "Значение"])
+
+        st.table(param_df)
 
 
 @st.cache_data
