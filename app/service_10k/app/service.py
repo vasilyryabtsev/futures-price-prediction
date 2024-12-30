@@ -23,8 +23,9 @@ class ModelContext:
         Loading model context
         """
         self.model_lr = joblib.load(config.PATH_LR_MODEL)
-        self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-        self.model_bert = DistilBertModel.from_pretrained('distilbert-base-uncased')
+        model_name = 'distilbert-base-uncased'
+        self.tokenizer = DistilBertTokenizer.from_pretrained(model_name)
+        self.model_bert = DistilBertModel.from_pretrained(model_name)
 
 
 model_context = ModelContext()
@@ -33,12 +34,15 @@ logger = logging.getLogger('uvicorn.error')
 
 def predict_text(report: str) -> entities.PredictResponse:
     """
-    This method involves tokenization and vectorization of text, as well as forecasting
+    This method involves tokenization and vectorization of
+    text, as well as forecasting
     """
     logger.info('Токенизация начата')
+    content_device = model_context.device
     tokens = model_context.tokenizer(report[42080:47080],
                                      return_tensors='pt',
-                                     padding=True, truncation=True).to(model_context.device)
+                                     padding=True,
+                                     truncation=True).to(content_device)
     logger.info('Токенизация завершена')
     logger.info('Старт расчета эмбеддингов')
     with torch.no_grad():
