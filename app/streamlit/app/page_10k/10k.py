@@ -1,13 +1,85 @@
 import streamlit as st
 import requests
 import pandas as pd
+import matplotlib.pyplot as plt
+
+
+@st.cache_data
+def upload_data(path: str) -> pd.DataFrame:
+    '''
+    Загрузка датасета.
+    '''
+    return pd.read_csv(path)
+
+
+def plot_MDA_distribution(data):
+    """
+    Функция для построения гистограммы распределения длины раздела MDA.
+    """
+    plt.figure(figsize=(8, 5))
+    plt.hist(data['full_content_length'], bins=20, alpha=0.7)
+    plt.title('Распределение длины раздела MDA отчетов 10-K')
+    plt.xlabel('Длина (символов)')
+    plt.grid()
+    
+    return plt
+
+
+def boxplot_MDA_length(data):
+    """
+    Функция для построения boxplot для длины раздела MDA.
+    """
+    plt.figure(figsize=(8, 5))
+    plt.boxplot(data['full_content_length'])
+    plt.title('Длина раздела MDA отчетов 10-K в зависимости от значения таргета')
+    plt.ylabel('Длина (символов)')
+    plt.grid()
+    
+    return plt
+
+
+def hist_target_dist(data):
+    """
+    Функция для построения гистограммы распределения значений с разной целевой переменной.
+    """
+    plt.figure(figsize=(8, 5))
+    plt.hist(data['target_10_index'], bins=3, alpha=0.7)
+    plt.title('Распределение целевой переменной')
+    plt.xlabel('Количество наблюдений')
+    plt.grid()
+    
+    return plt
+
+
+def get_unique_tickers(data):
+    '''
+    Возвращает уникальные тикеры и количество отчетов по ним.
+    '''
+    report_counts = data['ticker'].value_counts().reset_index()
+    report_counts.columns = ['Тикер', 'Количество отчетов']
+    return report_counts
 
 
 def eda():
     '''
     Результаты разведовательного анализа данных.
     '''
-    pass
+    st.header("EDA")
+
+    data = upload_data('page_10k/final.csv')
+    data['full_content_length'] = data['MDA'].apply(len)
+    st.write('1. Список компаний, по которым проводится анализ')
+    tickers = get_unique_tickers(data)
+    st.table(tickers)
+    st.write('2. Распределение длины раздела MDA отчетов 10K')
+    fig_len = plot_MDA_distribution(data)
+    st.pyplot(fig_len)
+    st.write('3. Boxplot длины раздела MDA отчетов 10K по таргету')
+    bp_len = boxplot_MDA_length(data)
+    st.pyplot(bp_len)
+    st.write('4. Распределение целевой переменной')
+    dist_len = hist_target_dist(data)
+    st.pyplot(dist_len)
 
 
 @st.cache_data
