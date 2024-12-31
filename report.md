@@ -73,11 +73,16 @@
 │       └── requirements.txt # Список используемых библиотек
 ├── check_py.sh # Скрипт для проверки скриптов python по pycodestyle.py, flake8 и pylint
 ├── checkpoint.md # Первый чекпоинт
-├── images # Картинки для документации
-│   ├── image-1.png
-│   ├── image-2.png
-│   ├── image-3.png
-│   └── image-4.png
+├── media # Картинки и гифки для документации
+│   ├── gifs
+│   │   ├── 10_k.gif
+│   │   └── twitter.gif
+│   └── images
+│       ├── image-1.png
+│       ├── image-2.png
+│       ├── image-3.png
+│       ├── image-4.png
+│       └── image-5.png
 ├── load_quotes.py # Скрипт для загрузки котировок по тикерам
 ├── pycodestyle.py # Проверка Python-скриптов на соответствие кодстайлу
 ├── report.md # Документация
