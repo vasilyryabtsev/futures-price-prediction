@@ -1,7 +1,7 @@
-from sklearn.preprocessing import FunctionTransformer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import numpy as np
+
 
 def preprocessing(X, y=None):
     '''
@@ -9,11 +9,18 @@ def preprocessing(X, y=None):
     '''
     X_copy = X.copy()
 
-    tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
-    model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
+    name = 'ProsusAI/finbert'
+    tokenizer = AutoTokenizer.from_pretrained(name)
+    model = AutoModelForSequenceClassification.from_pretrained(name)
 
     # Токенезация
-    tokenized = X_copy['text'].apply((lambda x: tokenizer.encode(x, add_special_tokens=True)))
+    def tokenize(x: str):
+        '''
+        Разбивает документ на токены.
+        '''
+        return tokenizer.encode(x, add_special_tokens=True)
+
+    tokenized = X_copy['text'].apply(tokenize)
 
     # Паддинг (чтобы все тексты были одинаковой длины)
     max_len = 0
@@ -32,5 +39,5 @@ def preprocessing(X, y=None):
         last_hidden_states = model(input_ids, attention_mask=attention_mask)
 
     features = last_hidden_states[0].numpy()
-    
+
     return features
