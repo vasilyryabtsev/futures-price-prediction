@@ -103,6 +103,14 @@
 
 5. Откройте в браузере [http://localhost:8501/](media/http://localhost:8501/).
 
+## Демонстрация работы странице Twitter
+
+![alt text](media/gifs/twitter_1.gif)
+
+![alt text](media/gifs/twitter_2.gif)
+
+![alt text](media/gifs/twitter_3.gif)
+
 ## Демонстрация работы странице 10_k
 
 ![alt text](media/gifs/10_k_1.gif)
