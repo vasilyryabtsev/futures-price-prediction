@@ -99,6 +99,12 @@
     
 4. Необходимо дождаться запуска всех сервисов.
 
-![alt text](images/image-5.png)
+![alt text](media/images/image-5.png)
 
-5. Откройте в браузере [http://localhost:8501/](http://localhost:8501/).
+5. Откройте в браузере [http://localhost:8501/](media/http://localhost:8501/).
+
+## Демонстрация работы странице 10_k
+
+![alt text](media/gifs/10_k_1.gif)
+
+![alt text](media/gifs/10_k_2.gif)
