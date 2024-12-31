@@ -72,3 +72,4 @@ Telegram: [@ak0va](https://t.me/ak0va)
 Приложение предоставляет возможность получить гиперпараметры обученной модели.
 
 ![alt text](media/images/image-4.png)
+
