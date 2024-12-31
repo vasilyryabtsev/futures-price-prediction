@@ -57,7 +57,8 @@
 │       │   │   └── words_cloud.png
 │       │   ├── page_10k # Страница для анализа отчетов 10-K
 │       │   │   ├── 10k.py # Логика страницы
-│       │   │   └── __init__.py # Инициализация модуля
+│       │   │   ├── __init__.py # Инициализация модуля
+│       │   │   └── final.csv # Датасет, для демонстрации EDA
 │       │   ├── page_news # Страница для анализа новостей
 │       │   │   ├── __init__.py # Инициализация модуля
 │       │   │   └── news.py # Логика страницы
@@ -105,14 +106,8 @@
 
 ## Демонстрация работы странице Twitter
 
-![alt text](media/gifs/twitter_1.gif)
-
-![alt text](media/gifs/twitter_2.gif)
-
-![alt text](media/gifs/twitter_3.gif)
+![alt text](media/gifs/twitter.gif)
 
 ## Демонстрация работы странице 10_k
 
-![alt text](media/gifs/10_k_1.gif)
-
-![alt text](media/gifs/10_k_2.gif)
+![alt text](media/gifs/10_k.gif)
