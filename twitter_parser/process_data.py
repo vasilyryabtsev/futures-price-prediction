@@ -1,12 +1,13 @@
 import json
 import pandas as pd
-from config import PATH_JSON, PATH_CSV
+from config import PATH_JSON, PATH_CSV, TICKER
 
 def save_tweets(tweets, counter):
     with open(PATH_JSON, mode='a', encoding='utf-8') as file:
         for tweet in tweets:
             new_data = {
-                "user_id": tweet.id, # User id
+                "ticker": TICKER, # Ticker
+                "user": tweet.user.name, # Username
                 "text": tweet.text, # The full text of the tweet.
                 "lang": tweet.lang, # The language of the tweet.
                 "in_reply_to": tweet.in_reply_to, # The tweet ID this tweet is in reply to, if any

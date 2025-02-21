@@ -28,7 +28,11 @@ async def main():
     while is_tweets(tweets):
         counter = save_tweets(tweets, counter)
         time.sleep(5)
-        tweets = await tweets.next()
+        try:
+            tweets = await tweets.next()
+        except Exception as e:
+            print(e)
+            break
     
     print(f'Collected {next(counter)} tweets')
     
