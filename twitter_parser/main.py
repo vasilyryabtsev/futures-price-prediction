@@ -1,6 +1,7 @@
 import asyncio
 import time
 from twikit import Client
+from itertools import count
 from config import QUERY, COUNT
 from process_data import save_tweets
 
@@ -22,12 +23,14 @@ async def main():
                                        product='Latest',
                                        count=COUNT)
     
+    counter = count()
+    
     while is_tweets(tweets):
+        counter = save_tweets(tweets, counter)
         time.sleep(5)
-        save_tweets(tweets)
         tweets = await tweets.next()
+    
+    print(f'Collected {next(counter)} tweets')
+    
 
-        
 asyncio.run(main())
-    
-    

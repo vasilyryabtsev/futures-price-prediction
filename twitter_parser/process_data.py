@@ -2,7 +2,7 @@ import json
 import pandas as pd
 from config import PATH_JSON, PATH_CSV
 
-def save_tweets(tweets):
+def save_tweets(tweets, counter):
     with open(PATH_JSON, mode='a', encoding='utf-8') as file:
         for tweet in tweets:
             new_data = {
@@ -30,6 +30,8 @@ def save_tweets(tweets):
             }
             json.dump(new_data, file)
             file.write('\n')
+            next(counter)
+    return counter
             
 if __name__ == "__main__":
     df = pd.read_json(PATH_JSON, lines=True)
