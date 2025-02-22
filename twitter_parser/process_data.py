@@ -1,12 +1,15 @@
 import json
 import pandas as pd
-from config import PATH_JSON, PATH_CSV, TICKER
+from config import PATH_JSON, PATH_CSV
 
-def save_tweets(tweets, counter):
+def save_tweets(tweets, counter, ticker):
+    """
+    Сохранение твитов в файл jsonl
+    """
     with open(PATH_JSON, mode='a', encoding='utf-8') as file:
         for tweet in tweets:
             new_data = {
-                "ticker": TICKER, # Ticker
+                "ticker": ticker, # Ticker
                 "user": tweet.user.name, # Username
                 "text": tweet.text, # The full text of the tweet.
                 "lang": tweet.lang, # The language of the tweet.
@@ -33,7 +36,7 @@ def save_tweets(tweets, counter):
             file.write('\n')
             next(counter)
     return counter
-            
+
 if __name__ == "__main__":
     df = pd.read_json(PATH_JSON, lines=True)
     df.to_csv(PATH_CSV, index=False, encoding="utf-8")
