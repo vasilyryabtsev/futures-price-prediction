@@ -8,9 +8,18 @@ from nltk.stem import PorterStemmer
 download("stopwords")
 
 stop_words = set(stopwords.words('english'))
-tokenizer = TweetTokenizer(reduce_len=True)
+tokenizer = TweetTokenizer(reduce_len=True, preserve_case=False, strip_handles=True)
+punctuation = '''!”#$%&'()*+,-./:;<=>?@[\]^_`{|}~"’...'''
 stemmer = PorterStemmer()
 
 def tweet_tokenizer(tweet):
     tokens = tokenizer.tokenize(tweet)
-    return [stemmer.stem(token) for token in tokens if token not in stop_words]
+    tokens = [token for token in tokens if token not in stop_words]
+    clear_tokens = []
+    for token in tokens:
+        if token not in stop_words:
+            if token in punctuation:
+                continue
+            else:
+                clear_tokens.append(stemmer.stem(token))
+    return clear_tokens
