@@ -2,7 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 import pickle
 import json
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 import pandas as pd
 import uvicorn
@@ -93,6 +93,32 @@ async def get_hyperparameters():
     serialized = {key: filter_serializable(value) for key,
                   value in hyperparameters.items()}
     return HyperparametersResponse(hyperparameters=serialized)
+
+
+@app.post("/fit")
+async def fit_model():
+    """
+    Имитация дообучения модели.
+    """
+    logger.info("Фит модели запущен (имитация)")
+    return {"message": "Модель успешно дообучена (имитация)"}
+
+
+class SetParamsRequest(BaseModel):
+    params: dict  # Словарь новых параметров модели
+
+@app.post("/set")
+async def set_model_params(request: SetParamsRequest):
+    """
+    Устанавливает новые параметры модели.
+    """
+    try:
+        logger.info(f"Установка новых параметров: {request.params}")
+        app.state.model.named_steps['clf'].set_params(**request.params)
+        return {"message": "Гиперпараметры успешно обновлены"}
+    except Exception as e:
+        logger.error(f"Ошибка при установке параметров: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка: {str(e)}")
 
 
 if __name__ == '__main__':
