@@ -31,8 +31,8 @@ def preprocessing(X, y=None):
 
     # Masking (нужно показать модели, что все нули это пустое место)
     attention_mask = np.where(padded != 0, 1, 0)
-    input_ids = torch.tensor(padded)
-    attention_mask = torch.tensor(attention_mask)
+    input_ids = torch.tensor(padded, dtype=torch.long)
+    attention_mask = torch.tensor(attention_mask, dtype=torch.long)
 
     # Применение модели
     with torch.no_grad():
