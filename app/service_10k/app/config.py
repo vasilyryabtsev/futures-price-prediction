@@ -1,7 +1,8 @@
 import os
 from uvicorn.logging import DefaultFormatter
 
-PATH_LR_MODEL = 'model/lrm.joblib'
+PATH_MODEL = 'model/best_model_and_pca.pkl'
+MODEL_NAME = 'ProsusAI/finbert'
 DEVICE = 'cpu'
 
 os.makedirs('logs', exist_ok=True)
