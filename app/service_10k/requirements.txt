@@ -3,3 +3,4 @@ uvicorn==0.23.1
 python-multipart==0.0.20
 transformers==4.47.1
 scikit_learn==1.6.0
+lightgbm
