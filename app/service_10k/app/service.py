@@ -1,7 +1,8 @@
 import logging
 import torch
-import joblib
-from transformers import DistilBertTokenizer, DistilBertModel
+import pickle
+import numpy as np
+from transformers import AutoModel, AutoTokenizer
 
 import entities
 import config
@@ -12,19 +13,43 @@ class ModelContext:
         """
         Initialization of context
         """
-        self.model_lr = None
+        self.loaded_gbm = None
+        self.loaded_pca = None
         self.tokenizer = None
         self.model_bert = None
+        self.model_path = config.PATH_MODEL
+        self.model_name = config.MODEL_NAME
         self.device = torch.device(config.DEVICE)
 
-    def load_models(self):
+    def load_models(self) -> None:
         """
         Loading model context
         """
-        self.model_lr = joblib.load(config.PATH_LR_MODEL)
-        model_name = 'distilbert-base-uncased'
-        self.tokenizer = DistilBertTokenizer.from_pretrained(model_name)
-        self.model_bert = DistilBertModel.from_pretrained(model_name)
+        with open(self.model_path, 'rb') as file:
+            self.loaded_gbm, self.loaded_pca = pickle.load(file)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.model_bert = AutoModel.from_pretrained(self.model_name)
+        self.model_bert = self.model_bert.to(self.device)
+
+    def get_tokens(self, report: str):
+        """
+        Get tokens
+        """
+        return self.tokenizer(
+            report[1500:6500],
+            return_tensors='pt',
+            max_length=512,
+            padding='max_length',
+            truncation=True
+        ).to(self.device)
+    
+    def get_text_embedding(self, inputs) -> np.array:
+        """
+        Get embeddings
+        """
+        outputs = self.model_bert(**inputs)
+        embeddings = outputs.last_hidden_state[:, 0, :]
+        return np.array([embeddings.detach().cpu().numpy()[0]])
 
 
 model_context = ModelContext()
@@ -37,25 +62,29 @@ def predict_text(report: str) -> entities.PredictResponse:
     text, as well as forecasting
     """
     logger.info('Токенизация начата')
-    content_device = model_context.device
-    tokens = model_context.tokenizer(report[42080:47080],
-                                     return_tensors='pt',
-                                     padding=True,
-                                     truncation=True).to(content_device)
+    inputs = model_context.get_tokens(report)
     logger.info('Токенизация завершена')
+    
     logger.info('Старт расчета эмбеддингов')
-    with torch.no_grad():
-        outputs = model_context.model_bert(**tokens)
-        embedding = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
+    vectors = model_context.get_text_embedding(inputs)
     logger.info('Расчет эмбеддингов завершен')
-
+    
+    logger.info('Снижение размерности эмбеддингов')
+    vectors_pca = model_context.loaded_pca.transform(vectors)
+    logger.info('Размерность эмбеддингов снижена')
+    
     logger.info('Старт прогнозирования вероятности')
-    probabilities = model_context.model_lr.predict_proba(embedding)
+    probs = model_context.loaded_gbm.predict(
+        data=vectors_pca, 
+        num_iteration=model_context.loaded_gbm.best_iteration
+    )
     logger.info('Прогнозирование вероятности завершено')
-
+    
+    prob_pos = probs[0]
+    prob_neg = 1 - prob_pos
     response = entities.PredictResponse(
-        negative_probability=probabilities[0][0],
-        positive_probability=probabilities[0][1]
+        negative_probability=prob_neg,
+        positive_probability=prob_pos
     )
 
     return response
@@ -66,4 +95,7 @@ def get_parameters() -> entities.ParamsEntity:
     Return an instance of ParamsEntity with default parameters.
     """
     logger.info('Запрошена информация о гиперпараметрах обучения')
-    return entities.ParamsEntity()
+    return entities.ParamsEntity(
+        pca_params=model_context.loaded_pca.get_params(),
+        gbm_params=model_context.loaded_gbm.params
+    )

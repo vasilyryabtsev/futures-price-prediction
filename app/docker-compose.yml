@@ -12,24 +12,6 @@ services:
     networks:
       - app-network
 
-  service_news:
-    build:
-      context: ./service_news
-      dockerfile: Dockerfile
-    ports:
-      - "8002:8002"
-    networks:
-      - app-network
-
-  service_reddit:
-    build:
-      context: ./service_reddit
-      dockerfile: Dockerfile
-    ports:
-      - "8003:8003"
-    networks:
-      - app-network
-
   service_twitter:
     build:
       context: ./service_twitter
@@ -51,8 +33,6 @@ services:
       - app-network
     depends_on:
       - service_10k
-      - service_news
-      - service_reddit
       - service_twitter
 
 networks:
