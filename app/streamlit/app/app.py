@@ -13,8 +13,6 @@ def main():
     # Словарь страниц с указанием модулей
     pages = {
         "Годовой отчет": "page_10k.10k",
-        "Новости": "page_news.news",
-        "Reddit": "page_reddit.reddit",
         "Twitter": "page_twitter.twitter"
     }
 
