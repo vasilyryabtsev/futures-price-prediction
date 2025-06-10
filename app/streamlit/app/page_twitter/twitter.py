@@ -1,13 +1,18 @@
 import streamlit as st
 import requests
 import pandas as pd
+import logging
 
+
+logger = logging.getLogger('page_twitter')
 
 @st.cache_data
 def upload_data(path: str) -> pd.DataFrame:
     '''
     Загрузка датасета.
     '''
+    logger.info('Получены данные')
+
     return pd.read_csv(path)
 
 
@@ -16,6 +21,8 @@ def get_unique(col: pd.Series) -> pd.DataFrame:
     '''
     Возвращает уникальные значения атрибута.
     '''
+    logger.info('Возвращены уникальные значения атрибута')
+
     return pd.DataFrame({col.name: col.unique()})
 
 
@@ -33,13 +40,16 @@ def show_images():
     if check_plot:
         st.image(images[0])
         st.image(images[1])
-
+    
+    logger.info('Показаны графики')
 
 @st.cache_data
 def class_prop(target: pd.Series) -> pd.DataFrame:
     '''
     Возвращает соотношение классов.
     '''
+    logger.info('Возвращены соотношения классов')
+
     return target.value_counts(normalize=True).to_frame()
 
 
@@ -76,6 +86,8 @@ def eda():
     st.write('Соотношение классов:')
     st.write(class_prop(data['1_day_after']))
 
+    logger.info('Вызван EDA')
+
 
 @st.cache_data
 def get_params():
@@ -86,9 +98,11 @@ def get_params():
     try:
         response = requests.get(api_url)
         response.raise_for_status()
+        logger.info('Получены параметры')
         return response.json()['hyperparameters']
     except requests.exceptions.RequestException as e:
         st.error(f"Не удалось подключиться к сервису: {e}")
+        logger.error(f"Не удалось получить параметры: {str(e)}")
         return {}
 
 
@@ -103,6 +117,8 @@ def model_params():
                                 columns=["Параметр", "Значение"])
 
         st.table(param_df)
+    
+    logger.info('Возвращены параметры')
 
 
 @st.cache_data
@@ -115,9 +131,11 @@ def get_predict(text):
     try:
         response = requests.post(api_url, json=input_data)
         response.raise_for_status()
+        logger.info('Возвращен прогноз')
         return response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"Не удалось подключиться к сервису: {e}")
+        logger.error(f"Не удалось вернуть прогноз: {str(e)}")
         return {}
 
 
@@ -136,6 +154,8 @@ def model_prediction():
         else:
             st.write("🟥: 0.0")
             st.write("🟩: 0.0")
+    
+    logger.info('Отображен прогноз')
 
 
 def render_page():
