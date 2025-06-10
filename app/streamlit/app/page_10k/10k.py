@@ -2,6 +2,9 @@ import streamlit as st
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
+import logging
+
+logger = logging.getLogger('page_10k')
 
 
 @st.cache_data
@@ -9,6 +12,8 @@ def upload_data(path: str) -> pd.DataFrame:
     '''
     Загрузка датасета.
     '''
+    logger.info('Получены данные')
+
     return pd.read_csv(path)
 
 
@@ -22,6 +27,8 @@ def plot_MDA_distribution(data):
     plt.xlabel('Длина (символов)')
     plt.grid()
     
+    logger.info('Построена гистограмма распределения')
+
     return plt
 
 
@@ -34,7 +41,9 @@ def boxplot_MDA_length(data):
     plt.title('Длина раздела MDA отчетов 10-K в зависимости от значения таргета')
     plt.ylabel('Длина (символов)')
     plt.grid()
-    
+
+    logger.info('Построен boxplot')
+
     return plt
 
 
@@ -48,6 +57,8 @@ def hist_target_dist(data):
     plt.xlabel('Количество наблюдений')
     plt.grid()
     
+    logger.info('Построена гистограмма распределения значений с разной целевой переменной')
+
     return plt
 
 
@@ -57,6 +68,9 @@ def get_unique_tickers(data):
     '''
     report_counts = data['ticker'].value_counts().reset_index()
     report_counts.columns = ['Тикер', 'Количество отчетов']
+
+    logger.info('Возврат уникальных тикеров')
+
     return report_counts
 
 
@@ -64,6 +78,8 @@ def eda():
     '''
     Результаты разведовательного анализа данных.
     '''
+    logger.info('Вызван EDA')
+
     st.header("EDA")
 
     data = upload_data('page_10k/final.csv')
@@ -91,9 +107,11 @@ def get_params():
     try:
         response = requests.get(api_url)
         response.raise_for_status()
+        logger.info('Получены параметры модели')
         return response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"Не удалось подключиться к сервису: {e}")
+        logger.error(f"Не удалось получить параметры: {str(e)}")
         return {}
 
 
@@ -103,6 +121,7 @@ def model_params():
     '''
     st.image('eda_10k/ROC_AUC.png', caption='График ROC кривой')
     params = get_params()
+    logger.info('Отображены параметры модели')
     if params:
         param_df = pd.DataFrame(list(params.items()),
                                 columns=["Параметр", "Значение"])
@@ -129,9 +148,11 @@ def get_predict(uploaded_file):
     try:
         response = requests.post(api_url, files=files)
         response.raise_for_status()
+        logger.info('Возвращен прогноз')
         return response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"Не удалось подключиться к сервису: {e}")
+        logger.error(f"Не удалось вернуть прогноз: {str(e)}")
         return {}
 
 
@@ -149,6 +170,7 @@ def model_prediction():
         else:
             st.write("🟥: 0.0")
             st.write("🟩: 0.0")
+    logger.info('Отображен прогноз')
 
 
 def render_page():
