@@ -33,8 +33,6 @@ services:
       - app-network
     depends_on:
       - service_10k
-      - service_news
-      - service_reddit
       - service_twitter
 
 networks:
